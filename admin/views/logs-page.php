@@ -1,6 +1,18 @@
 <div class="wrap">
     <h1>Mail Logs</h1>
 
+    <div class="actions-menu" style="display: flex; justify-content: space-between; align-items: center; margin: 1em 0;">
+        <form method="post" style="margin-bottom: 15px;">
+            <?php wp_nonce_field('wmi_clear_logs'); ?>
+            <input type="hidden" name="wmi_action" value="clear_logs">
+            <button type="submit" class="button button-danger"
+                onclick="return confirm('Are you sure you want to delete all logs?');">
+                Clear Logs
+            </button>
+        </form>
+        <span>Logs will be automatically cleared after 90 days...</span>
+    </div>
+
     <?php if (!empty($logs)): ?>
         <table class="widefat striped wmi-table">
             <thead>

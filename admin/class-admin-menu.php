@@ -45,11 +45,37 @@ class AdminMenu
         );
     }
 
-    public function render()
+    private function handle_actions()
     {
+
+        if (!isset($_POST['wmi_action'])) {
+            return;
+        }
+
+        if ($_POST['wmi_action'] !== 'clear_logs') {
+            return;
+        }
+
+        if (
+            !isset($_POST['_wpnonce']) ||
+            !wp_verify_nonce($_POST['_wpnonce'], 'wmi_clear_logs')
+        ) {
+            return;
+        }
+
         global $wpdb;
         $table = \WMI\Database::get_table();
-        $logs = $wpdb->get_results("SELECT * FROM $table ORDER BY id DESC LIMIT 50");
+
+        $wpdb->query("TRUNCATE TABLE {$table}");
+    }
+
+    public function render()
+    {
+        $this->handle_actions();
+
+        global $wpdb;
+        $table = \WMI\Database::get_table();
+        $logs = $wpdb->get_results("SELECT * FROM {$table} ORDER BY id DESC LIMIT 50");
 
         require WMI_PATH . 'admin/views/logs-page.php';
     }

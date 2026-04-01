@@ -27,5 +27,44 @@ class Plugin {
     private function init_hooks() {
         new Hooks();
         new AdminMenu();
+
+        // 🔥 CRON hook
+        add_action('wmi_cleanup_logs', [$this, 'cleanup_logs']);
+    }
+
+    /**
+     * 🔥 CRON: delete logs older than 90 days
+     */
+    public function cleanup_logs() {
+        global $wpdb;
+
+        $table = Database::get_table();
+
+        $wpdb->query(
+            "DELETE FROM {$table} WHERE created_at < NOW() - INTERVAL 90 DAY"
+        );
+    }
+
+    /**
+     * 🔥 ACTIVATION
+     */
+    public static function activate() {
+
+        // create DB table
+        Database::install();
+
+        // schedule cron if not exists
+        if (!wp_next_scheduled('wmi_cleanup_logs')) {
+            wp_schedule_event(time(), 'daily', 'wmi_cleanup_logs');
+        }
+    }
+
+    /**
+     * 🔥 DEACTIVATION
+     */
+    public static function deactivate() {
+
+        // remove cron
+        wp_clear_scheduled_hook('wmi_cleanup_logs');
     }
 }
